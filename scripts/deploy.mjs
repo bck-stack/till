@@ -2,7 +2,7 @@
 //   node scripts/deploy.mjs lreact 0.05        swap Base Sepolia ETH for lREACT at the faucet (1 ETH -> 100 lREACT)
 //   node scripts/deploy.mjs all base,unichain  reactive on Lasna, ledger on Base Sepolia, a sweeper per lane, wiring
 // Thresholds are in USDC (default 1). Funding amounts are the minimum that keeps callbacks flowing for a demo.
-import { parseEther, parseAbi, parseUnits, getContractAddress } from "viem";
+import { parseEther, parseAbi, parseUnits, parseGwei } from "viem";
 import { artifact, keys, lane, reactive, loadDeployments, saveDeployments, LEDGER_LANE, FAUCET_BASE_SEPOLIA } from "./net.mjs";
 
 const [step = "all", arg = "base,unichain"] = process.argv.slice(2);
@@ -12,10 +12,13 @@ const FUND_CALLBACK = parseEther(process.env.TILL_FUND_CALLBACK ?? "0.002"); // 
 const { deployer, vault } = keys();
 const d = loadDeployments();
 const log = (...a) => console.log(new Date().toISOString().slice(11, 19), ...a);
+// Lasna rejects a zero priority tip ("gas tip cap 0, minimum needed 1").
+const fees = (c) => (c.pub.chain?.id === 5318007 ? { maxPriorityFeePerGas: parseGwei("1") } : {});
+process.on("unhandledRejection", (e) => { console.error("FAILED:", e.shortMessage ?? e.message, e.details ?? ""); process.exit(1); });
 
 async function deploy(c, name, args, value) {
   const { abi, bytecode } = artifact(name);
-  const hash = await c.wallet.deployContract({ abi, bytecode, args, value });
+  const hash = await c.wallet.deployContract({ abi, bytecode, args, value, ...fees(c) });
   const r = await c.pub.waitForTransactionReceipt({ hash, timeout: 180_000 });
   if (r.status !== "success") throw new Error(`${name} deploy failed ${hash}`);
   log(`${name} at ${r.contractAddress} (tx ${hash})`);
@@ -23,7 +26,7 @@ async function deploy(c, name, args, value) {
 }
 
 async function send(c, address, abi, functionName, args, value) {
-  const hash = await c.wallet.writeContract({ address, abi, functionName, args, value });
+  const hash = await c.wallet.writeContract({ address, abi, functionName, args, value, ...fees(c) });
   const r = await c.pub.waitForTransactionReceipt({ hash, timeout: 180_000 });
   if (r.status !== "success") throw new Error(`${functionName} failed ${hash}`);
   log(`${functionName} ok (tx ${hash})`);

@@ -1,0 +1,66 @@
+{
+  "faucet": [
+    {
+      "eth": "0.0035",
+      "tx": "0xe1ec81bc58b8704891ec6396bce900ef7248cae0b005475116b62ca56df313a0"
+    }
+  ],
+  "funding": [
+    {
+      "what": "lreact",
+      "a": "0.0017",
+      "tx": "0x82aa826429197cb275ad4390e6ed4a3144c0e0f2fd7b40aa2bf91c6654f8990f",
+      "status": "success"
+    }
+  ],
+  "reactive": {
+    "address": "0xfefeca149a7384a0c9f6968e93f52a1f16c81ffe",
+    "tx": "0x658ebe40d0f91ba292f1a1b6210b5867c2672e4e9660cade005daf9fbeab70f4"
+  },
+  "ledger": {
+    "address": "0xf6d266c64d7b2532c916b888ef17a32bccc1e83a",
+    "tx": "0x2a48f5a713687dd4389de6dc3c2cba6b00e84c06bad21799c62c9d726217cb44"
+  },
+  "sweepers": {
+    "base": {
+      "address": "0x9dee59e6f11eb183edc4b3969ef5418c1042bd90",
+      "tx": "0xa558a9c2d80b6356a435447e36db72de706b33fd4cbefbfd9e11523552974892",
+      "approveTx": "0x58aaf2c8d702d61f836b105a7469e0b3562f2f6aa42961bf831d89b402216b54"
+    },
+    "unichain": {
+      "address": "0xfefeca149a7384a0c9f6968e93f52a1f16c81ffe",
+      "tx": "0xb95d874951cf95fb61a9cbb65f27f7c369a2f36fb9fcf0d3e320c36f6c32f3b5",
+      "approveTx": "0x7bbedbf270524671b627c65b0a12fb42b5f7b09d3c6515bc25a83f67ac4cec97"
+    }
+  },
+  "setLedgerTx": "0x28b737de617ab7fd8902a3c0cdf83dc866b7694f163c785afd281aca16858d2a",
+  "lanes": {
+    "base": {
+      "chainId": 84532,
+      "threshold": "1000000",
+      "tx": "0xe573209422967bde08233645651b6eb411442600465537ea88c15ce06944eaed"
+    },
+    "unichain": {
+      "chainId": 1301,
+      "threshold": "1000000",
+      "tx": "0xf9f501f7d6cb112977b6ddbcd8cdee9d88f64b0fce97ab31fa880273b8050a7a"
+    }
+  },
+  "clock": [
+    {
+      "clock": "cron1000",
+      "tx": "0xa1b3cf3efa114c993ae0a7aaf20f88c02452bf82c13db9230c44bd73a7d034e7",
+      "at": "2026-11-18T20:39:06.160Z"
+    },
+    {
+      "clock": "cron10000",
+      "tx": "0xb8dbf9cf1c0b34fe187b63130aeec6690f28a67679b81138558c5e50936d712b",
+      "at": "2026-11-18T20:39:16.269Z"
+    },
+    {
+      "clock": "cron1000",
+      "tx": "0x3e8379c65128e931c773ee56db694a012ee801da66a2ea311ba760eb54aaddc4",
+      "at": "2026-11-18T20:39:27.231Z"
+    }
+  ]
+}

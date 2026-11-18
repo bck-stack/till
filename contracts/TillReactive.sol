@@ -13,7 +13,6 @@ contract TillReactive is AbstractReactive {
     uint256 internal constant TRANSFER_TOPIC_0 = uint256(keccak256("Transfer(address,address,uint256)"));
     uint256 internal constant SWEPT_TOPIC_0 = uint256(keccak256("Swept(address,uint256)"));
     address internal constant CRON_SOURCE = 0x0000000000000000000000000000000000fffFfF;
-    uint64 internal constant CALLBACK_GAS = 400_000;
 
     struct Lane {
         address usdc;
@@ -49,6 +48,10 @@ contract TillReactive is AbstractReactive {
     uint256 public payers;
     uint256 public shift;
     uint256 public clockTopic; // 0 = shift closing off
+    /// @notice Gas limit requested for every callback. The destination proxy keeps part of it for its own
+    /// accounting (_extraGas + _maxChargeGas, 130k on Base Sepolia) and a first booking writes ~255k of fresh
+    /// storage, so 400k was not enough. Fees are charged on gas used, so a generous limit costs nothing extra.
+    uint64 public callbackGas = 1_000_000;
 
     modifier onlyOwner() {
         if (msg.sender != owner) revert NotOwner();
@@ -98,6 +101,10 @@ contract TillReactive is AbstractReactive {
         if (topic_ != 0) {
             SYSTEM.subscribe(block.chainid, CRON_SOURCE, topic_, REACTIVE_IGNORE, REACTIVE_IGNORE, REACTIVE_IGNORE);
         }
+    }
+
+    function setCallbackGas(uint64 gas_) external onlyOwner {
+        callbackGas = gas_;
     }
 
     /// @notice Settle any debt with the system contract from this contract's balance.
@@ -193,7 +200,7 @@ contract TillReactive is AbstractReactive {
         SYSTEM.requestCallbackV_1_0(ISystemContract.CallbackConfiguration_V_1_0({
             chainId: chainId_,
             recipient: recipient_,
-            gasLimit: CALLBACK_GAS,
+            gasLimit: callbackGas,
             payload: payload_
         }));
     }

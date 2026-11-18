@@ -19,15 +19,28 @@ const fromBlock = await L.pub.getBlockNumber();
 const t0 = Date.now();
 const hash = await l.wallet.writeContract({ address: l.usdc, abi: erc20, functionName: "transfer", args: [deployer.address, amount] });
 const rc = await l.pub.waitForTransactionReceipt({ hash });
-const originBlock = await l.pub.getBlock({ blockNumber: rc.blockNumber });
+// Some public RPCs return the receipt a moment before they serve the block.
+let originBlock;
+for (let i = 0; !originBlock; i++) {
+  try { originBlock = await l.pub.getBlock({ blockNumber: rc.blockNumber }); }
+  catch (e) { if (i > 10) throw e; await new Promise((r) => setTimeout(r, 1000)); }
+}
 const t1 = Date.now();
 console.log(`sale     ${formatUnits(amount, 6)} USDC on ${name}  ${l.explorer}/tx/${hash}  (included after ${((t1 - t0) / 1000).toFixed(1)} s)`);
 
 async function waitFor(event, args, match, label) {
   const deadline = Date.now() + Number(timeoutArg) * 1000;
+  let cursor = fromBlock;
   while (Date.now() < deadline) {
-    const logs = await L.pub.getLogs({ address: d.ledger.address, event, args, fromBlock });
-    const hit = logs.find(match);
+    // Public Base Sepolia RPC serves eth_getLogs over at most 200 blocks (200 ms blocks), so walk in windows.
+    const head = await L.pub.getBlockNumber();
+    let hit;
+    while (!hit && cursor <= head) {
+      const to = cursor + 199n < head ? cursor + 199n : head;
+      const logs = await L.pub.getLogs({ address: d.ledger.address, event, args, fromBlock: cursor, toBlock: to });
+      hit = logs.find(match);
+      if (!hit) cursor = to + 1n;
+    }
     if (hit) {
       const b = await L.pub.getBlock({ blockNumber: hit.blockNumber });
       const chainSecs = Number(b.timestamp - originBlock.timestamp);

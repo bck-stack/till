@@ -1,0 +1,57 @@
+{
+  "funding": [
+    {
+      "what": "lreact",
+      "a": "0.028",
+      "tx": "0xb7011a6cd297a8d32a3d3607be62a18c28b2262479b5b5109c3d5f1bbc39df12",
+      "status": "success"
+    },
+    {
+      "what": "bridge",
+      "a": "base",
+      "b": "0.01",
+      "tx": "0x5224639c90d4c88b2cb8f45f4af1f366010e0d921b44ad7effc2c1ccad681768",
+      "status": "success"
+    },
+    {
+      "what": "bridge",
+      "a": "unichain",
+      "b": "0.01",
+      "tx": "0x2c2560ed5ae902f13405a11a22c6779d597fc0376e666cd36e14c8e1f371391e",
+      "status": "success"
+    }
+  ],
+  "reactive": {
+    "address": "0x61c85958c265ac5df9feb9cc3e07a536e426ed87",
+    "tx": "0xe4ec2ce8832721c4dd094227a66a6539a3678e8ff58ac95a088a0dab542f466e"
+  },
+  "ledger": {
+    "address": "0x61c85958c265ac5df9feb9cc3e07a536e426ed87",
+    "tx": "0x5af241fc5805dfe7beca4b5d7ebe4d33bb49dae123ce787244379d5c0b7347da"
+  },
+  "sweepers": {
+    "base": {
+      "address": "0x5bf6df28c44480d07d13860e718b938f2e80919c",
+      "tx": "0x8c5bbebbe080d4d8551163f0fc4cfa1bead9184bbeea510649237e8015dd0c84",
+      "approveTx": "0x97fe82c766daf3aaf13e87d839d5ded7719e497a8af49ee93be3add07ccbeaf5"
+    },
+    "unichain": {
+      "address": "0x61c85958c265ac5df9feb9cc3e07a536e426ed87",
+      "tx": "0x98ec100b408b3368df8453ffc1d1044562ebfd8bce0da66ce54d76d5e28f065e",
+      "approveTx": "0x9ef9a31efc757a231bd3fc7d5c19bdfaeeb326d32fe697ef0c22244f89ea622e"
+    }
+  },
+  "setLedgerTx": "0x4233dd7abb94edfab587aba760465527efcd597d39c714ac657639d305b4492c",
+  "lanes": {
+    "base": {
+      "chainId": 84532,
+      "threshold": "1000000",
+      "tx": "0xd7432cfe89206d02ca64d25a5d5c4371fee23371bb2f68e963aed7709eba8fed"
+    },
+    "unichain": {
+      "chainId": 1301,
+      "threshold": "1000000",
+      "tx": "0xc80fe042ced3b0e2cdf0a040f5a851a6bdb5d452a978dc12f38fe6cc85a8a437"
+    }
+  }
+}

@@ -95,6 +95,7 @@ describe("TillReactive subscriptions", () => {
     const { till, stranger } = await setup();
     await assert.rejects(till.write.addLane([1n, SYSTEM, SYSTEM, 1n], { account: stranger.account }), /NotOwner/);
     await assert.rejects(till.write.setShiftClock([CRON1000], { account: stranger.account }), /NotOwner/);
+    await assert.rejects(till.write.setCallbackGas([500_000n], { account: stranger.account }), /NotOwner/);
   });
 
   it("react() rejects anyone but the system contract", async () => {
@@ -111,6 +112,8 @@ describe("booking", () => {
     const rec = await pay(ctx, BASE, ctx.payer, USDC(0.25));
     const { hashes } = await flush(ctx);
     assert.equal(hashes.length, 1); // below threshold: book only, no sweep
+    // Every callback asks for enough gas for a first booking plus the proxy's own share.
+    assert.equal((await ctx.system.read.callbackAt([ctx.cbStart])).gasLimit, 1_000_000n);
     assert.equal(await ctx.ledger.read.totalGross(), USDC(0.25));
     assert.equal(await ctx.ledger.read.totalSales(), 1n);
     assert.equal(await ctx.ledger.read.payers(), 1n);
