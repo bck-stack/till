@@ -71,12 +71,14 @@ the origin block to the callback block.
 | sweep confirmed | Base Sepolia | 1.50 | [Swept 0x572b…](https://sepolia.basescan.org/tx/0x572bbcdb4f34031b9531d7b7dbac5e4181ce0461c73d58bdcf1c2c00449e6191) | [0xfda1…](https://lasna.reactscan.net/tx/0xfda1aacf3c52fd97bf61161111a84576ba413e1b245f28b51e5855fb5ad9a77d) | [recordSweep 0x4513…](https://sepolia.basescan.org/tx/0x4513106e93eff8879859ecee4e82cec3d8e2402a8144eb5d331b63c6922d33e8) | 2 s |
 | sale, crosses the threshold | Unichain Sepolia | 0.90 | [0xb8f9…](https://sepolia.uniscan.xyz/tx/0xb8f9c8a5a4768695f49f604bcf8429299376dbf14d9464196dc1defcae6b1809) | [0xea90…](https://lasna.reactscan.net/tx/0xea90231acf71eeb2e45957a4b10bdf15b714f1de8b054153ecd58ac4d0f7a130) | [book 0xff9c…](https://sepolia.basescan.org/tx/0xff9ca61b1eee04d8a7814f7f73e44f1d5db0439e2815a5671c01c97781b2a387) + sweep | 1 s |
 | sweep confirmed | Unichain Sepolia | 1.15 | [Swept 0xb6e1…](https://sepolia.uniscan.xyz/tx/0xb6e11ed7910d0ae8a86cd89e73a3fd4820938f266df10691ecac3406ca24189b) | [0xac2a…](https://lasna.reactscan.net/tx/0xac2add5a24fff44aedb866720073915b19498ccd38b7886a9e193a2e4465fe23) | [recordSweep 0x4b28…](https://sepolia.basescan.org/tx/0x4b28a5319d2e31447d302c355332e71f35cfdf1a2ec51fca32dfe25d69ed56f1) | 1 s |
+| shift closed (Cron1000 tick) | Reactive Lasna | 3.65 gross, 6 sales | Cron event | [0xc566…](https://lasna.reactscan.net/tx/0xc566745e401af4ccf668ccf9ce1844dce9fa742e57a7c8770347aeef5c98d0e7) | [closeShift 0x4706…](https://sepolia.basescan.org/tx/0x4706f6210df3ea01a35a1ce55f7c41e935dc22a14d656c1ea6936a9baa62dc20) | – |
 
 The Base sweep moved 1.50 USDC although the booked float was 1.10: the sweeper moves the merchant's whole USDC
 balance, and 0.40 USDC had arrived before this deployment was watching (a first deployment, kept in
 [`deployments/testnet-v1-callback-gas-400k.json`](deployments/testnet-v1-callback-gas-400k.json), requested
 callbacks with a 400k gas limit; the proxy keeps 130k of it, and a first booking needs ~255k, so the booking
-failed with `CallbackFailure`. The gas limit is now 1M and owner-settable). `node scripts/evidence.mjs` rebuilds
+failed with `CallbackFailure`. The gas limit is now 1M and owner-settable). The shift clock was switched on for this demonstration and off again afterwards (`node scripts/admin.mjs clock off`):
+every tick is billed whether or not anything happened, so it stays off until a merchant wants it. `node scripts/evidence.mjs` rebuilds
 this table from chain data into [`deployments/loops.json`](deployments/loops.json).
 
 ## Run it
