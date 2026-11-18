@@ -16,7 +16,7 @@
   table { width:100%; border-collapse:collapse; margin-top:10px; font-variant-numeric:tabular-nums }
   th, td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); white-space:nowrap }
   th { color:var(--mute); font-weight:500; font-size:12px; text-transform:uppercase; letter-spacing:.05em }
-  td.r, th.r { text-align:right } a { color:#8cc8ff; text-decoration:none } .tag { color:var(--ok) } .scroll { overflow-x:auto }
+  td.r, th.r { text-align:right } tr.fresh td { animation: flash 3s ease-out } @keyframes flash { from { background:#2b5b45 } to { background:transparent } } a { color:#8cc8ff; text-decoration:none } .tag { color:var(--ok) } .scroll { overflow-x:auto }
   h2 { font-size:16px; margin:28px 0 4px } .note { color:var(--mute); font-size:13px }
 </style>
 </head>
@@ -27,6 +27,7 @@
   <div class="grid" id="totals"></div>
   <h2>Per chain</h2>
   <div class="scroll"><table id="chains"><thead><tr><th>Chain</th><th class="r">Sales</th><th class="r">Gross</th><th class="r">Swept to vault</th><th class="r">Float</th></tr></thead><tbody></tbody></table></div>
+  <div class="note">The sweeper moves the merchant's whole USDC balance, so "swept" also includes USDC that arrived before Till was watching.</div>
   <h2>Latest bookings</h2>
   <div class="note">Each row is a callback from Reactive. "Loop" is the time from the payment's block to the booking's block.</div>
   <div class="scroll"><table id="events"><thead><tr><th>Ledger tx</th><th>Chain</th><th>Payer</th><th class="r">Amount</th><th class="r">Loop</th><th></th></tr></thead><tbody></tbody></table></div>
@@ -50,6 +51,12 @@ const booked = parseAbiItem("event Booked(uint256 indexed chainId, address index
 const usd = (v) => "$" + Number(formatUnits(v, 6)).toFixed(2);
 const el = (id) => document.getElementById(id);
 const short = (h) => h.slice(0, 8) + "…" + h.slice(-4);
+const REFRESH = Math.max(2, Number(new URLSearchParams(location.search).get("refresh")) || 15) * 1000;
+const seen = new Set();
+const loopCache = new Map();
+const all = [];
+let lastHead = null;
+let firstRender = true;
 
 const dep = await fetch("../deployments/testnet.json").then((r) => r.json());
 const ledger = dep.ledger.address;
@@ -76,31 +83,42 @@ async function refresh() {
 
   const head = await base.getBlockNumber();
   // Base Sepolia makes 5 blocks a second; this RPC serves up to 50k blocks per query, so walk back in windows.
-  const all = [];
-  for (let to = head, n = 0; all.length < 12 && n < 12; n++, to -= 50000n) {
-    const from = to > 49999n ? to - 49999n : 0n;
-    all.unshift(...(await base.getLogs({ address: ledger, event: booked, fromBlock: from, toBlock: to })));
+  if (lastHead === null) {
+    for (let to = head, n = 0; all.length < 12 && n < 12; n++, to -= 50000n) {
+      const from = to > 49999n ? to - 49999n : 0n;
+      all.unshift(...(await base.getLogs({ address: ledger, event: booked, fromBlock: from, toBlock: to })));
+    }
+  } else if (head > lastHead) {
+    all.push(...(await base.getLogs({ address: ledger, event: booked, fromBlock: lastHead + 1n, toBlock: head })));
   }
+  lastHead = head;
   const logs = all.slice(-12).reverse();
   const out = [];
   for (const l of logs) {
     const id = Number(l.args.chainId);
     const originTx = "0x" + l.args.originTx.toString(16).padStart(64, "0");
-    let loop = "";
-    try {
-      const t1 = (await base.getBlock({ blockNumber: l.blockNumber })).timestamp;
-      loop = `${Number(t1 - (await originTime(id, originTx)))} s`;
-    } catch { loop = "–"; }
-    out.push(`<tr><td><a href="${CHAINS[84532].tx}${l.transactionHash}" target="_blank" rel="noopener">${short(l.transactionHash)}</a></td>
+    let loop = loopCache.get(l.transactionHash);
+    if (!loop) {
+      try {
+        const t1 = (await base.getBlock({ blockNumber: l.blockNumber })).timestamp;
+        loop = `${Number(t1 - (await originTime(id, originTx)))} s`;
+        loopCache.set(l.transactionHash, loop);
+      } catch { loop = "–"; }
+    }
+    const fresh = !firstRender && !seen.has(l.transactionHash);
+    seen.add(l.transactionHash);
+    out.push(`<tr class="${fresh ? "fresh" : ""}"><td><a href="${CHAINS[84532].tx}${l.transactionHash}" target="_blank" rel="noopener">${short(l.transactionHash)}</a></td>
       <td><a href="${CHAINS[id]?.tx ?? "#"}${originTx}" target="_blank" rel="noopener">${CHAINS[id]?.name ?? id}</a></td>
       <td>${short(l.args.payer)}</td><td class="r">${usd(l.args.amount)}</td><td class="r">${loop}</td>
       <td>${l.args.firstTimePayer ? '<span class="tag">new payer</span>' : ""}</td></tr>`);
   }
   el("events").tBodies[0].innerHTML = out.join("") || `<tr><td colspan="6" class="note">No sales yet.</td></tr>`;
+  firstRender = false;
   el("status").textContent = `Ledger ${ledger} on Base Sepolia · updated ${new Date().toLocaleTimeString()}`;
 }
 refresh().catch((e) => (el("status").textContent = "Error: " + e.message));
-setInterval(() => refresh().catch(() => {}), 15000);
+let busy = false;
+setInterval(async () => { if (busy) return; busy = true; try { await refresh(); } catch {} busy = false; }, REFRESH);
 </script>
 </body>
 </html>

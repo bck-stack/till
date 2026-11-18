@@ -25,6 +25,18 @@
   },
   {
     "kind": "sale",
+    "chain": "unichain",
+    "amount": 1.1,
+    "origin": "https://sepolia.uniscan.xyz/tx/0xa1f6e4e2784d3b0a0ccf3dee024ed4dae4fb642de7dbb25f3c4b4a9939a9da97",
+    "reactive": "https://lasna.reactscan.net/tx/0x0cd2530927007e5ffff79699ce98780471f3ce24d523803f6c4c570d3300e20b",
+    "callback": "https://sepolia.basescan.org/tx/0xffa4c4ebd6196241076b3abbea87b205341ba3464a07e644aa3e6995940857c2",
+    "seconds": {
+      "originToReactive": -1,
+      "originToCallback": 1
+    }
+  },
+  {
+    "kind": "sale",
     "chain": "base",
     "amount": 0.4,
     "origin": "https://sepolia.basescan.org/tx/0x4c21990486673b055ff9d6ff84fc3190802b6abc9ac6226581ee10ac76b74aed",
@@ -44,6 +56,18 @@
     "callback": "https://sepolia.basescan.org/tx/0x76331eaf74e7f8a932585d5d80eb472419890d6ee39e6d7830d48fa3599bd7c3",
     "seconds": {
       "originToReactive": 0,
+      "originToCallback": 2
+    }
+  },
+  {
+    "kind": "sale",
+    "chain": "base",
+    "amount": 0.3,
+    "origin": "https://sepolia.basescan.org/tx/0xa74c5393db521e0cf76664645be50d53b328d35b352c37946f0e9691dbb1760e",
+    "reactive": "https://lasna.reactscan.net/tx/0x9ed0be2e0e06875530ac703710e7c680aba1f50a0361206c4c10891fcc1a921e",
+    "callback": "https://sepolia.basescan.org/tx/0x360fad62d411b1ed15508ad75e7517d92853b33ee39f92a02f9422c7c7d223c4",
+    "seconds": {
+      "originToReactive": -1,
       "originToCallback": 2
     }
   },
@@ -68,5 +92,24 @@
     "seconds": {
       "originToCallback": 1
     }
+  },
+  {
+    "kind": "sweep",
+    "chain": "unichain",
+    "amount": 1.1,
+    "origin": "https://sepolia.uniscan.xyz/tx/0x37634fd0ee4fd6baa201edc180186b552363a45914c29cf5a8d8bf2592808dc9",
+    "reactive": "https://lasna.reactscan.net/tx/0x04667fc147d5d88b09b95d80f4872f120c6f760506ed5fa8af2c70679f19477c",
+    "callback": "https://sepolia.basescan.org/tx/0xbbb83e67d66dc045b495638f6a0bb8764ab9964ec712b51a920fb6fcde747373",
+    "seconds": {
+      "originToCallback": 1
+    }
+  },
+  {
+    "kind": "shift",
+    "shift": 1,
+    "gross": 3.65,
+    "sales": 6,
+    "reactive": "https://lasna.reactscan.net/tx/0xc566745e401af4ccf668ccf9ce1844dce9fa742e57a7c8770347aeef5c98d0e7",
+    "callback": "https://sepolia.basescan.org/tx/0x4706f6210df3ea01a35a1ce55f7c41e935dc22a14d656c1ea6936a9baa62dc20"
   }
 ]

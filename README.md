@@ -53,6 +53,8 @@ Safety properties, all tested:
 | TillSweeper | Base Sepolia | [`0x9dee59e6f11eb183edc4b3969ef5418c1042bd90`](https://sepolia.basescan.org/address/0x9dee59e6f11eb183edc4b3969ef5418c1042bd90) |
 | TillSweeper | Unichain Sepolia | [`0xfefeca149a7384a0c9f6968e93f52a1f16c81ffe`](https://sepolia.uniscan.xyz/address/0xfefeca149a7384a0c9f6968e93f52a1f16c81ffe) |
 
+All four are verified on [Sourcify](https://sourcify.dev) (exact match; `node scripts/verify.mjs`).
+
 (The reactive contract and the Unichain sweeper share an address: both were the deployer's first transaction on
 their chain.)
 
