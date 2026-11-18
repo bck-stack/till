@@ -36,7 +36,7 @@
 import { createPublicClient, http, parseAbi, parseAbiItem, formatUnits } from "https://cdn.jsdelivr.net/npm/viem@2.21.55/+esm";
 
 const CHAINS = {
-  84532: { name: "Base Sepolia", rpc: "https://sepolia.base.org", tx: "https://sepolia.basescan.org/tx/" },
+  84532: { name: "Base Sepolia", rpc: "https://base-sepolia-rpc.publicnode.com", tx: "https://sepolia.basescan.org/tx/" },
   1301: { name: "Unichain Sepolia", rpc: "https://sepolia.unichain.org", tx: "https://sepolia.uniscan.xyz/tx/" },
   11155111: { name: "Ethereum Sepolia", rpc: "https://ethereum-sepolia-rpc.publicnode.com", tx: "https://sepolia.etherscan.io/tx/" },
 };
@@ -75,7 +75,13 @@ async function refresh() {
   el("chains").tBodies[0].innerHTML = rows.join("");
 
   const head = await base.getBlockNumber();
-  const logs = (await base.getLogs({ address: ledger, event: booked, fromBlock: head > 400000n ? head - 400000n : 0n })).slice(-12).reverse();
+  // Base Sepolia makes 5 blocks a second; this RPC serves up to 50k blocks per query, so walk back in windows.
+  const all = [];
+  for (let to = head, n = 0; all.length < 12 && n < 12; n++, to -= 50000n) {
+    const from = to > 49999n ? to - 49999n : 0n;
+    all.unshift(...(await base.getLogs({ address: ledger, event: booked, fromBlock: from, toBlock: to })));
+  }
+  const logs = all.slice(-12).reverse();
   const out = [];
   for (const l of logs) {
     const id = Number(l.args.chainId);
