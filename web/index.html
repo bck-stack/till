@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Till — live books</title>
+<style>
+  :root { --bg:#0f1720; --card:#16212d; --ink:#e8eef4; --mute:#8fa3b8; --line:#243445; --ok:#5ee0a0; --warn:#ffc861; }
+  * { box-sizing:border-box }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 system-ui, -apple-system, Segoe UI, sans-serif }
+  main { max-width:980px; margin:0 auto; padding:28px 16px 60px }
+  h1 { margin:0; font-size:28px } .sub { color:var(--mute); margin:4px 0 22px }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px }
+  .k { color:var(--mute); font-size:12px; text-transform:uppercase; letter-spacing:.06em } .v { font-size:24px; font-weight:600 }
+  table { width:100%; border-collapse:collapse; margin-top:10px; font-variant-numeric:tabular-nums }
+  th, td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); white-space:nowrap }
+  th { color:var(--mute); font-weight:500; font-size:12px; text-transform:uppercase; letter-spacing:.05em }
+  td.r, th.r { text-align:right } a { color:#8cc8ff; text-decoration:none } .tag { color:var(--ok) } .scroll { overflow-x:auto }
+  h2 { font-size:16px; margin:28px 0 4px } .note { color:var(--mute); font-size:13px }
+</style>
+</head>
+<body>
+<main>
+  <h1>Till</h1>
+  <div class="sub">Live books of one merchant paid in USDC on several chains, kept by Reactive Network. Test networks.</div>
+  <div class="grid" id="totals"></div>
+  <h2>Per chain</h2>
+  <div class="scroll"><table id="chains"><thead><tr><th>Chain</th><th class="r">Sales</th><th class="r">Gross</th><th class="r">Swept to vault</th><th class="r">Float</th></tr></thead><tbody></tbody></table></div>
+  <h2>Latest bookings</h2>
+  <div class="note">Each row is a callback from Reactive. "Loop" is the time from the payment's block to the booking's block.</div>
+  <div class="scroll"><table id="events"><thead><tr><th>Ledger tx</th><th>Chain</th><th>Payer</th><th class="r">Amount</th><th class="r">Loop</th><th></th></tr></thead><tbody></tbody></table></div>
+  <p class="note" id="status">Loading…</p>
+</main>
+<script type="module">
+import { createPublicClient, http, parseAbi, parseAbiItem, formatUnits } from "https://cdn.jsdelivr.net/npm/viem@2.21.55/+esm";
+
+const CHAINS = {
+  84532: { name: "Base Sepolia", rpc: "https://sepolia.base.org", tx: "https://sepolia.basescan.org/tx/" },
+  1301: { name: "Unichain Sepolia", rpc: "https://sepolia.unichain.org", tx: "https://sepolia.uniscan.xyz/tx/" },
+  11155111: { name: "Ethereum Sepolia", rpc: "https://ethereum-sepolia-rpc.publicnode.com", tx: "https://sepolia.etherscan.io/tx/" },
+};
+const abi = parseAbi([
+  "function totalGross() view returns (uint256)", "function totalSales() view returns (uint256)",
+  "function totalSwept() view returns (uint256)", "function payers() view returns (uint256)",
+  "function chainCount() view returns (uint256)", "function chainIds(uint256) view returns (uint256)",
+  "function books(uint256) view returns (uint256 gross, uint256 sales, uint256 swept, uint256 float, uint256 lastOriginTx)",
+]);
+const booked = parseAbiItem("event Booked(uint256 indexed chainId, address indexed payer, uint256 amount, uint256 originTx, bool firstTimePayer, uint256 floatAfter)");
+const usd = (v) => "$" + Number(formatUnits(v, 6)).toFixed(2);
+const el = (id) => document.getElementById(id);
+const short = (h) => h.slice(0, 8) + "…" + h.slice(-4);
+
+const dep = await fetch("../deployments/testnet.json").then((r) => r.json());
+const ledger = dep.ledger.address;
+const base = createPublicClient({ transport: http(CHAINS[84532].rpc) });
+const originClients = {};
+const originTime = async (chainId, txHash) => {
+  const c = (originClients[chainId] ??= createPublicClient({ transport: http(CHAINS[chainId].rpc) }));
+  const r = await c.getTransactionReceipt({ hash: txHash });
+  return (await c.getBlock({ blockNumber: r.blockNumber })).timestamp;
+};
+
+async function refresh() {
+  const read = (functionName, args = []) => base.readContract({ address: ledger, abi, functionName, args });
+  const [gross, sales, swept, payers, n] = await Promise.all(["totalGross", "totalSales", "totalSwept", "payers", "chainCount"].map((f) => read(f)));
+  el("totals").innerHTML = [["Gross", usd(gross)], ["Sales", sales], ["Swept to vault", usd(swept)], ["Payers", payers]]
+    .map(([k, v]) => `<div class="card"><div class="k">${k}</div><div class="v">${v}</div></div>`).join("");
+  const rows = [];
+  for (let i = 0n; i < n; i++) {
+    const id = await read("chainIds", [i]);
+    const b = await read("books", [id]);
+    rows.push(`<tr><td>${CHAINS[id]?.name ?? id}</td><td class="r">${b[1]}</td><td class="r">${usd(b[0])}</td><td class="r">${usd(b[2])}</td><td class="r">${usd(b[3])}</td></tr>`);
+  }
+  el("chains").tBodies[0].innerHTML = rows.join("");
+
+  const head = await base.getBlockNumber();
+  const logs = (await base.getLogs({ address: ledger, event: booked, fromBlock: head > 400000n ? head - 400000n : 0n })).slice(-12).reverse();
+  const out = [];
+  for (const l of logs) {
+    const id = Number(l.args.chainId);
+    const originTx = "0x" + l.args.originTx.toString(16).padStart(64, "0");
+    let loop = "";
+    try {
+      const t1 = (await base.getBlock({ blockNumber: l.blockNumber })).timestamp;
+      loop = `${Number(t1 - (await originTime(id, originTx)))} s`;
+    } catch { loop = "–"; }
+    out.push(`<tr><td><a href="${CHAINS[84532].tx}${l.transactionHash}" target="_blank" rel="noopener">${short(l.transactionHash)}</a></td>
+      <td><a href="${CHAINS[id]?.tx ?? "#"}${originTx}" target="_blank" rel="noopener">${CHAINS[id]?.name ?? id}</a></td>
+      <td>${short(l.args.payer)}</td><td class="r">${usd(l.args.amount)}</td><td class="r">${loop}</td>
+      <td>${l.args.firstTimePayer ? '<span class="tag">new payer</span>' : ""}</td></tr>`);
+  }
+  el("events").tBodies[0].innerHTML = out.join("") || `<tr><td colspan="6" class="note">No sales yet.</td></tr>`;
+  el("status").textContent = `Ledger ${ledger} on Base Sepolia · updated ${new Date().toLocaleTimeString()}`;
+}
+refresh().catch((e) => (el("status").textContent = "Error: " + e.message));
+setInterval(() => refresh().catch(() => {}), 15000);
+</script>
+</body>
+</html>
