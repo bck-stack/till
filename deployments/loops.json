@@ -1,0 +1,72 @@
+[
+  {
+    "kind": "sale",
+    "chain": "unichain",
+    "amount": 0.25,
+    "origin": "https://sepolia.uniscan.xyz/tx/0x721792fdc1b5afe1b702dd4b17eccf6fb5e5915362c6a031c27756656ee240d0",
+    "reactive": "https://lasna.reactscan.net/tx/0x9f7b6374f94dab0b148937c402d8d85d5c5be09e2e1b710925fb8d0d47aee24d",
+    "callback": "https://sepolia.basescan.org/tx/0x73690bf6e89a0446d964acb65862352bc22713b782def01f39bb32a9b0ce1bae",
+    "seconds": {
+      "originToReactive": -1,
+      "originToCallback": 2
+    }
+  },
+  {
+    "kind": "sale",
+    "chain": "unichain",
+    "amount": 0.9,
+    "origin": "https://sepolia.uniscan.xyz/tx/0xb8f9c8a5a4768695f49f604bcf8429299376dbf14d9464196dc1defcae6b1809",
+    "reactive": "https://lasna.reactscan.net/tx/0xea90231acf71eeb2e45957a4b10bdf15b714f1de8b054153ecd58ac4d0f7a130",
+    "callback": "https://sepolia.basescan.org/tx/0xff9ca61b1eee04d8a7814f7f73e44f1d5db0439e2815a5671c01c97781b2a387",
+    "seconds": {
+      "originToReactive": -1,
+      "originToCallback": 1
+    }
+  },
+  {
+    "kind": "sale",
+    "chain": "base",
+    "amount": 0.4,
+    "origin": "https://sepolia.basescan.org/tx/0x4c21990486673b055ff9d6ff84fc3190802b6abc9ac6226581ee10ac76b74aed",
+    "reactive": "https://lasna.reactscan.net/tx/0x65e9854bd8fd1e2d4e336befeaa29e74d1e02ccd7bda5936dd217cb69640c320",
+    "callback": "https://sepolia.basescan.org/tx/0xe22354b7e41cf7940e29ec322ce8b33ec4df547f2703098aeb2607d9b24862f2",
+    "seconds": {
+      "originToReactive": 0,
+      "originToCallback": 3
+    }
+  },
+  {
+    "kind": "sale",
+    "chain": "base",
+    "amount": 0.7,
+    "origin": "https://sepolia.basescan.org/tx/0x4f7257334f5cf47fca62ccabde0065e3786313485383614e352719246447e272",
+    "reactive": "https://lasna.reactscan.net/tx/0xdec707e192217b85654aa8b792d02f8efa6d91b1b4393744cae5d4d441ec43f0",
+    "callback": "https://sepolia.basescan.org/tx/0x76331eaf74e7f8a932585d5d80eb472419890d6ee39e6d7830d48fa3599bd7c3",
+    "seconds": {
+      "originToReactive": 0,
+      "originToCallback": 2
+    }
+  },
+  {
+    "kind": "sweep",
+    "chain": "base",
+    "amount": 1.5,
+    "origin": "https://sepolia.basescan.org/tx/0x572bbcdb4f34031b9531d7b7dbac5e4181ce0461c73d58bdcf1c2c00449e6191",
+    "reactive": "https://lasna.reactscan.net/tx/0xfda1aacf3c52fd97bf61161111a84576ba413e1b245f28b51e5855fb5ad9a77d",
+    "callback": "https://sepolia.basescan.org/tx/0x4513106e93eff8879859ecee4e82cec3d8e2402a8144eb5d331b63c6922d33e8",
+    "seconds": {
+      "originToCallback": 2
+    }
+  },
+  {
+    "kind": "sweep",
+    "chain": "unichain",
+    "amount": 1.15,
+    "origin": "https://sepolia.uniscan.xyz/tx/0xb6e11ed7910d0ae8a86cd89e73a3fd4820938f266df10691ecac3406ca24189b",
+    "reactive": "https://lasna.reactscan.net/tx/0xac2add5a24fff44aedb866720073915b19498ccd38b7886a9e193a2e4465fe23",
+    "callback": "https://sepolia.basescan.org/tx/0x4b28a5319d2e31447d302c355332e71f35cfdf1a2ec51fca32dfe25d69ed56f1",
+    "seconds": {
+      "originToCallback": 1
+    }
+  }
+]
