@@ -2,6 +2,9 @@
 
 **A cash register for sellers who get paid in USDC on more than one chain, run entirely by Reactive Network.**
 
+- Live books: https://bck-stack.github.io/till/web/
+- Video (2 min): https://youtu.be/y6vplMCjRF4
+
 I sell pay-per-call APIs over [x402](https://x402.org): every call is a small USDC payment to one merchant
 address, and the payments arrive on several chains. Three chores came with that, and each used to need a script
 and a server: write every sale into the books, move the float out of the hot wallet before it grows, and close
