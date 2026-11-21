@@ -2,7 +2,7 @@
 
 **A cash register for sellers who get paid in USDC on more than one chain, run entirely by Reactive Network.**
 
-We sell pay-per-call APIs over [x402](https://x402.org): every call is a small USDC payment to one merchant
+I sell pay-per-call APIs over [x402](https://x402.org): every call is a small USDC payment to one merchant
 address, and the payments arrive on several chains. Three chores came with that, and each used to need a script
 and a server: write every sale into the books, move the float out of the hot wallet before it grows, and close
 the day. Till does all three with no server and no keeper:
@@ -37,7 +37,7 @@ the day. Till does all three with no server and no keeper:
 | [`TillSweeper`](contracts/TillSweeper.sol) | each lane | Moves the merchant's USDC to the fixed vault, up to the merchant's approval |
 
 Safety properties, all tested:
-- Ledger and sweepers accept calls only from the Reactive callback proxy **and** only on behalf of our reactive
+- Ledger and sweepers accept calls only from the Reactive callback proxy **and** only on behalf of the Till reactive
   contract (`onlyServiceProvider` + `onlyCallbackSender`).
 - `react()` accepts only the system contract. Transfers to other addresses, or from other tokens, cost nothing
   and change nothing.
