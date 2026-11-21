@@ -34,7 +34,7 @@
   <p class="note" id="status">Loading…</p>
 </main>
 <script type="module">
-import { createPublicClient, http, parseAbi, parseAbiItem, formatUnits } from "https://cdn.jsdelivr.net/npm/viem@2.21.55/+esm";
+import { createPublicClient, decodeEventLog, http, parseAbi, parseAbiItem, formatUnits, toEventSelector } from "https://cdn.jsdelivr.net/npm/viem@2.21.55/+esm";
 
 const CHAINS = {
   84532: { name: "Base Sepolia", rpc: "https://base-sepolia-rpc.publicnode.com", tx: "https://sepolia.basescan.org/tx/" },
@@ -84,7 +84,19 @@ async function refresh() {
   const head = await base.getBlockNumber();
   // Base Sepolia makes 5 blocks a second; this RPC serves up to 50k blocks per query, so walk back in windows.
   if (lastHead === null) {
-    for (let to = head, n = 0; all.length < 12 && n < 12; n++, to -= 50000n) {
+    // The history is older than a few RPC windows (5 blocks a second), so read it once from Blockscout's log index,
+    // which has no block-range cap; new bookings after that come from the RPC as before.
+    let indexed = false;
+    try {
+      const q =`https://base-sepolia.blockscout.com/api?module=logs&action=getLogs&address=${ledger}&fromBlock=0&toBlock=${head}&topic0=${toEventSelector(booked)}`;
+      const res = await fetch(q).then((r) => r.json());
+      for (const x of res.result || []) {
+        const { args } = decodeEventLog({ abi: [booked], data: x.data, topics: x.topics });
+        all.push({ args, transactionHash: x.transactionHash, blockNumber: BigInt(x.blockNumber) });
+      }
+      indexed = res.status === "1";
+    } catch { /* fall back to the RPC windows below */ }
+    for (let to = head, n = 0; !indexed && all.length < 12 && n < 12; n++, to -= 50000n) {
       const from = to > 49999n ? to - 49999n : 0n;
       all.unshift(...(await base.getLogs({ address: ledger, event: booked, fromBlock: from, toBlock: to })));
     }
